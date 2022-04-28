@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+    <h1>tester! ! ! ! ! ! ! ! ! ! ! ! !</h1>
+
+    <% require 'pg' %>
+
+    <% connection = PG::connect(dbname: "goya") %>
+    <% connection.internal_encoding = "UTF-8" %>
+
+    <form action='indicate.cgi' method='POST'>
+          Veuillez saisir les caractères ci-dessous<br><br>
+          <input type="text"  name='input' ><br><br>
+          <input type="submit" name="Envoyer" >
+        </form>
+
+        <% result = connection.exec("select weight, give_for from crops;") %>
+        <% data = [] %>
+
+        <% result.each do |record| %>
+        <% data << "La taille de la courge amère：#{record["weight"]}　Qui a vendu：#{record["give_for"]}" %>
+        <% end %>
+
+          <form action="goya.cgi" method="POST">
+        appuyez sur le bouton ci-dessous pour accéder à la page d'informations sur la taille de la courge amère et la personne qui l'a vendue<br><br>
+            <input type="text" name="goya" value="<%= data.join(' ') %>"><br><br>
+            <input type="submit" name="Send">
+          </form>
+
+        <% result = connection.exec("select give_for from crops WHERE NOT give_for = 'consommation personnelle';") %>
+        <% data = [] %>
+
+        <% result.each do |record| %>
+        <% data << "Vendu a：#{record["give_for"]}" %>
+        <% end %>
+
+        <form action="goyagood.cgi" method="POST">
+    Appuyez sur le bouton ci-dessous pour passer à la page d'information sur la taille de la gourde amère et la personne qui l'a vendue.<br><br>
+            <input type="text" name="goyagood" value="<%= data.join(' ') %>"><br><br>
+            <input type="submit" name="Envoyer">
+          </form>
+
+          <% result = connection.exec("select quality from crops WHERE quality = false;") %>
+          <% data = [] %>
+
+          <% result.each do |record| %>
+          <% data << "Qualité：#{record["quality"]}" %>
+          <% end %>
+
+            <form action="goyabad.cgi" method="POST">
+      Appuyer sur le bouton ci-dessous pour accéder à la page d'information sur les produits de mauvaise qualité.<br><br>
+              <input type="text" name="goyabad" value="<%= data.join(' ') %>"><br><br>
+              <input type="submit" name="Envoyer">
+            </form>
+
+  </body>
+</html>
